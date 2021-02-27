@@ -1,44 +1,38 @@
 import random
-import re
 import string
 import subprocess
 from http import HTTPStatus
 
-import matplotlib.pyplot as plt
 import requests
-from config import (AUTH_URL, LOGGER, C, N, concurency_range, connect_time,
-                    failed_rq, payload_admin_account, processing_time, reqs,
-                    rq_per_s, rq_range, time_per_rq, time_per_rq_c,
-                    transfer_rate, waiting_time)
+from config import (AUTH_URL, LOGGER, payload_admin_account)
 
 
 
 class HTTPClient:
     access_token = None
-    
-    
+
     def generate_access_token():
         url = AUTH_URL
         headers = {'Content-Type': 'application/json'}
-        
+
         response = requests.request(
             method='POST',
             url=url,
             headers=headers,
             data=payload_admin_account
         )
-        
+
         if response.status_code != HTTPStatus.OK:
             LOGGER.critical('POST status code = ' + str(response.status_code))
             return
 
-        SharedValues.access_token = response.json()['access_token']
-        LOGGER.info('Got the intra access token: ' + SharedValues.access_token)
-        
+        HTTPClient.access_token = response.json()['access_token']
+        LOGGER.info('Got the intra access token: ' + HTTPClient.access_token)
+
 
     def template_get(url, headers, payload, need_access_token=False):
         initial_headers = headers
-        
+
         if need_access_token:
             del headers["Authorization"]
             response = requests.request("GET", url, headers=headers, data=payload)
@@ -47,7 +41,7 @@ class HTTPClient:
             headers["Authorization"] = Utils.get_random_token()
             response = requests.request("GET", url, headers=headers, data=payload)
             assert response.status_code == HTTPStatus.UNAUTHORIZED
-            
+
         response = requests.request("GET", url, headers=initial_headers, data=payload)
         assert (
             response.status_code == HTTPStatus.OK
@@ -55,11 +49,11 @@ class HTTPClient:
         )
         return response
 
-    
+
     def template_get_bad_request(url, headers, payload):
         response = requests.request("GET", url, headers=headers, data=payload)
         assert response.status_code == HTTPStatus.BAD_REQUEST
-        
+
         return response
 
 
@@ -70,17 +64,17 @@ class HTTPClient:
             or response.status_code == HTTPStatus.CREATED
         )
         ret = response
-        
+
         if need_access_token:
             del headers["Authorization"]
             response = requests.request("POST", url, headers=headers, data=payload)
-            
+
             assert response.status_code == HTTPStatus.UNAUTHORIZED
 
             headers["Authorization"] = Utils.get_random_token()
             response = requests.request("POST", url, headers=headers, data=payload)
             assert response.status_code == HTTPStatus.UNAUTHORIZED
-            
+
         return ret
 
 
