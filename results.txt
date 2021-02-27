@@ -1,0 +1,22 @@
+09/07/2020, 12:47:04
+AUTHENTICATION_____________________________:
+PASSED: 1300
+FAILED: 0
+AUTHORIZATION______________________________:
+PASSED: 1300
+FAILED: 0
+EXPORT_CONTROL_____________________________:
+PASSED: 0
+FAILED: 1300
+FLEXERA____________________________________:
+PASSED: 0
+FAILED: 1300
+GENERATE_BUNDLE____________________________:
+PASSED: 0
+FAILED: 1300
+IDENTITY_CARDS_____________________________:
+PASSED: 0
+FAILED: 1300
+PACKAGE_HISTORY____________________________:
+PASSED: 1300
+FAILED: 0

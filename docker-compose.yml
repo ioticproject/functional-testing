@@ -1,0 +1,15 @@
+version: "3.3"
+
+services:
+  testing:
+    image: testing:latest
+    command: python run.py
+    env_file:
+      - .env
+    volumes:
+      - ./:/root/test
+      - /var/run/docker.sock:/var/run/docker.sock
+
+networks:
+  backend:
+    driver: bridge
