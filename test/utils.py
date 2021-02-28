@@ -10,6 +10,7 @@ from config import (AUTH_URL, LOGGER, payload_admin_account)
 
 class HTTPClient:
     access_token = None
+    global_access_token = None
 
     def generate_access_token():
         url = AUTH_URL
@@ -26,12 +27,17 @@ class HTTPClient:
             LOGGER.critical('POST status code = ' + str(response.status_code))
             return
 
-        HTTPClient.access_token = response.json()['access_token']
-        LOGGER.info('Got the intra access token: ' + HTTPClient.access_token)
+        HTTPClient.global_access_token = "jwt " + response.json()['access_token']
+        LOGGER.info('Got the intra access token: ' + HTTPClient.global_access_token)
 
 
     def template_get(url, headers, payload, need_access_token=False):
-        initial_headers = headers
+        response = requests.request("GET", url, headers=headers, data=payload)
+        assert (
+            response.status_code == HTTPStatus.OK
+            or response.status_code == HTTPStatus.CREATED
+        )
+        ret = response
 
         if need_access_token:
             del headers["Authorization"]
@@ -42,12 +48,7 @@ class HTTPClient:
             response = requests.request("GET", url, headers=headers, data=payload)
             assert response.status_code == HTTPStatus.UNAUTHORIZED
 
-        response = requests.request("GET", url, headers=initial_headers, data=payload)
-        assert (
-            response.status_code == HTTPStatus.OK
-            or response.status_code == HTTPStatus.CREATED
-        )
-        return response
+        return ret
 
 
     def template_get_bad_request(url, headers, payload):
@@ -81,12 +82,12 @@ class HTTPClient:
     def template_post_bad_request(url, headers, payload):
         response = requests.request("POST", url, headers=headers, data=payload)
         assert response.status_code == HTTPStatus.BAD_REQUEST
-        
+
         return response
-        
+
 
 class Utils:
-    
+
     @staticmethod
     def get_random_string(length):
         """
@@ -95,8 +96,8 @@ class Utils:
         """
         letters = string.ascii_lowercase
         return ''.join(random.choice(letters) for i in range(length))
-        
-    
+
+
     @staticmethod
     def get_random_token():
         """
@@ -105,8 +106,8 @@ class Utils:
         """
         TOKEN_LENGTH = 256
         return Utils.get_random_string(TOKEN_LENGTH)
-        
-    
+
+
     def replace_key_in_json(json, key, val):
         if isinstance(json, dict):
             for k, v in json.items():

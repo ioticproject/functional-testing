@@ -19,7 +19,7 @@ if not (ADMIN_PASSWORD := os.getenv('ADMIN_PASSWORD')):
 if not (ADMIN_USERNAME := os.getenv('ADMIN_USERNAME')):
     sys.exit('The admin username must be provided '
              'through the "ADMIN_USERNAME" environment variable!')
-    
+
 CLIENT_PASSWORD = os.getenv('CLIENT_PASSWORD')
 CLIENT_USERNAME = os.getenv('CLIENT_USERNAME')
 
@@ -54,7 +54,8 @@ GET_FILTERED_SENSOR_DATA = os.getenv('GET_FILTERED_SENSOR_DATA')
 # verbose settings
 VERBOSE = int(os.getenv('VERBOSE'))
 
-# default Flask port, on this port all microservices will be exposed internally.
+# default Flask port, on this port all microservices
+# will be exposed internally.
 EXPOSED_PORT = int(os.getenv('EXPOSED_PORT'))
 
 HEALTH_URL = f"http://{HOST}:{EXPOSED_PORT}/{HEALTH}"
@@ -89,20 +90,6 @@ GET_FILTERED_SENSOR_DATA_URL = f"http://{HOST}:{EXPOSED_PORT}/{GET_FILTERED_SENS
 payload_admin_account = str({'username': ADMIN_USERNAME, 'password': ADMIN_PASSWORD}).replace("\'", "\"")
 payload_client_account = str({'username': CLIENT_USERNAME, 'password': CLIENT_PASSWORD}).replace("\'", "\"")
 
-
-C = 5
-N = 50
-rq_range = [5, 10, 25, 50, 100, 250, 500, 1000, 1500]
-concurency_range = [5, 10, 15, 20, 25, 50, 50, 50, 50]
-rq_per_s = []
-time_per_rq = []
-time_per_rq_c = []
-transfer_rate = []
-connect_time = []
-processing_time = []
-waiting_time = []
-failed_rq = []
-reqs = []
 
 # Configure Logging
 # LoggingConfig.disable_default_loggers()

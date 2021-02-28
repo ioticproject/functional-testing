@@ -1,53 +1,117 @@
-# from utils import generate_access_token
 from utils import Utils, HTTPClient
-import sys
-from config import payload_client_account, payload_admin_account
+from config import payload_client_account, payload_admin_account, LOGGER
 import os
+import requests
+from http import HTTPStatus
 import glob
 
+from config import (
+    ADD_USER_URL,
+    DELETE_USER_URL,
+    ADD_DEVICE_URL,
+    ADD_SENSORS_URL
+)
 
-# RUN BEFORE ALL TESTS
-def pytest_sessionstart(session):
-    # generate_access_token()
-    # if SharedValues.access_token is None:
-    #     sys.exit("[ERROR] Could not fetch the access token.")
-        
+
+def add_objects_for_tests():
+    # Generate access token
+    HTTPClient.generate_access_token()
+
+    # Add global user for the device and sensor tests
+    random_str = Utils.get_random_string(16)
+    new_user_payload = str({"username": "TEST-" + random_str,
+                            "password": "!!" + random_str,
+                            "email": random_str + "@test.com"
+                            }).replace("\'", "\"")
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    response = requests.request("POST",
+                                url=ADD_USER_URL,
+                                headers=headers,
+                                data=new_user_payload)
+    if response.status_code != HTTPStatus.CREATED:
+        exit("[ERROR] Could not add user for testing.")
+    HTTPClient.global_username = response.json()["username"]
+    HTTPClient.global_password = response.json()["password"]
+    HTTPClient.global_id = response.json()["id"]
+    LOGGER.info("[INFO] Added user for testing.")
+
+    # Add global device for the data and sensors tests
+    new_device_payload = str({"name": "TEST-" + random_str,
+                              "id_user": HTTPClient.global_id,
+                              "description": random_str
+                              }).replace("\'", "\"")
+    headers["Authorization"] = HTTPClient.global_access_token
+    response = requests.request("POST",
+                                url=ADD_DEVICE_URL,
+                                headers=headers,
+                                data=new_device_payload)
+    if response.status_code != HTTPStatus.CREATED:
+        exit("[ERROR] Could not add device for testing.")
+    HTTPClient.global_device_id = response.json()["id"]
+    LOGGER.info("[INFO] Added device for testing.")
+
+    # Add global sensor for the data tests
+    new_sensor_payload = str({"type": "TEST-" + random_str,
+                              "measuremUnit": "Celssius",
+                              "id_user": HTTPClient.global_id,
+                              "id_device": HTTPClient.global_device_id
+                              }).replace("\'", "\"")
+    headers["Authorization"] = HTTPClient.global_access_token
+    response = requests.request("POST",
+                                url=ADD_SENSORS_URL,
+                                headers=headers,
+                                data=new_sensor_payload)
+    if response.status_code != HTTPStatus.CREATED:
+        exit("[ERROR] Could not add sensor for testing.")
+    HTTPClient.global_device_id = response.json()["id"]
+    LOGGER.info("[INFO] Added sensor for testing.")
+
+
+def generate_payload_files():
     with open("test/helper_jsons/admin_credentials.json", 'w') as f:
         f.write(payload_admin_account)
-    
+
     with open("test/helper_jsons/user_credentials.json", 'w') as f:
         f.write(payload_client_account)
-    
+
     with open("test/helper_jsons/new_user_credentials.json", 'w') as f:
-        random_str = Utils.get_random_string(8)
+        random_str = Utils.get_random_string(16)
         new_user_payload = str({ "username": "TEST-" + random_str,
                     "password": "!!" + random_str,
                     "email": random_str + "@test.com"
                 }).replace("\'", "\"")
         f.write(new_user_payload)
-    
+
     with open("test/helper_jsons/new_device.json", 'w') as f:
-        random_str = "TEST-" + Utils.get_random_string(8)
+        random_str = "TEST-" + Utils.get_random_string(16)
         new_user_payload = str({ "name": random_str,
                                 "id_user": 2,
                                 "description": random_str}
                                ).replace("\'", "\"")
         f.write(new_user_payload)
-    
+
     with open("test/helper_jsons/new_sensor.json", 'w') as f:
-        random_str = "TEST-" + Utils.get_random_string(8)
+        random_str = "TEST-" + Utils.get_random_string(16)
         new_user_payload = str({"type": "temperature",
                                 "measuremUnit": "celssius",
                                 "id_user": 4,
                                 "id_device": 4}).replace("\'", "\"")
         f.write(new_user_payload)
-    
+
     with open("test/helper_jsons/new_data.json", 'w') as f:
-        new_user_payload = str({ "id_sensor": 2,
+        new_user_payload = str({"id_sensor": 2,
                                 "value": 2000}
                                ).replace("\'", "\"")
         f.write(new_user_payload)
-    
+
+
+# RUN BEFORE ALL TESTS
+def pytest_sessionstart(session):
+    generate_payload_files()
+    add_objects_for_tests()
+
 
 def pytest_sessionfinish(session):
     files = glob.glob("test/helper_jsons", recursive=True)
@@ -57,3 +121,12 @@ def pytest_sessionfinish(session):
             os.remove(f)
         except OSError as e:
             print("Error: %s : %s" % (f, e.strerror))
+
+    headers = {
+        'Authorization': HTTPClient.global_access_token
+    }
+    if requests.request("DELETE",
+                        url=DELETE_USER_URL.format(ID=HTTPClient.global_id),
+                        headers=headers,
+                        data={}).status_code != HTTPStatus.OK:
+        exit("[Error] Could not delete the test user. The database may be polluted")
