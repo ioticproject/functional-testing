@@ -4,7 +4,7 @@ import threading
 
 def thread_function(index, name):
     if name == 'pytest':
-        subprocess.run(["python", "-m", "pytest", "-s"])
+        subprocess.run(["python", "-m", "pytest", "-s", "--html=report.html", "--self-contained-html"])
     elif name == 'check_services':
         subprocess.run(["python", "check_services.py"])
 

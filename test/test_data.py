@@ -99,10 +99,8 @@ def test_get_filtered_sensor_data():
                                   headers=headers,
                                   need_access_token=True)
     assert isinstance(ret.json(), list)
-    print("_______________________________________________________________________")
-    print(ret.text)
 
-    url = GET_FILTERED_SENSOR_DATA_URL.format(ID=HTTPClient.global_id) + "?min_value=10&from=2000-11-11"
+    url = GET_FILTERED_SENSOR_DATA_URL.format(ID=HTTPClient.global_id) + "?from=2000-11-11"
     headers = {
         'Authorization': HTTPClient.global_access_token
     }
@@ -111,8 +109,6 @@ def test_get_filtered_sensor_data():
                                   headers=headers,
                                   need_access_token=True)
     assert isinstance(ret.json(), list)
-    print("_______________________________________________________________________")
-    print(ret.text)
 
     assert True
 
