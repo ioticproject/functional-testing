@@ -1,9 +1,8 @@
 from utils import Utils, HTTPClient
 from config import payload_client_account, payload_admin_account, LOGGER
-import os
+import os, shutil
 import requests
 from http import HTTPStatus
-import glob
 
 from config import (
     ADD_USER_URL,
@@ -65,7 +64,7 @@ def add_objects_for_tests():
                                 data=new_sensor_payload)
     if response.status_code != HTTPStatus.CREATED:
         exit("[ERROR] Could not add sensor for testing.")
-    HTTPClient.global_device_id = response.json()["id"]
+    HTTPClient.global_sensor_id = response.json()["id"]
     LOGGER.info("[INFO] Added sensor for testing.")
 
 
@@ -107,6 +106,18 @@ def generate_payload_files():
         f.write(new_user_payload)
 
 
+def remove_dir_content(folder):
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
+
+
 # RUN BEFORE ALL TESTS
 def pytest_sessionstart(session):
     generate_payload_files()
@@ -114,13 +125,7 @@ def pytest_sessionstart(session):
 
 
 def pytest_sessionfinish(session):
-    files = glob.glob("test/helper_jsons", recursive=True)
-
-    for f in files:
-        try:
-            os.remove(f)
-        except OSError as e:
-            print("Error: %s : %s" % (f, e.strerror))
+    remove_dir_content("test/helper_jsons")
 
     headers = {
         'Authorization': HTTPClient.global_access_token

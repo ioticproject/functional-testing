@@ -1,62 +1,132 @@
-# import pytest
-# from utils import SharedValues
-# from utils import template_get, template_post
-# from config import (
-#     payload_client_account,
-#     GET_SENSORS_URL,
-#     ADD_SENSORS_URL,
-#     GET_USER_SENSORS_URL,
-#     GET_DEVICE_SENSORS_URL,
-#     rq_per_s, time_per_rq, time_per_rq_c,
-#     transfer_rate,
-#     connect_time, processing_time, waiting_time,
-#     failed_rq,
-#     reqs
-# )
+import pytest
+import requests
+from http import HTTPStatus
+import json
+
+from utils import Utils, HTTPClient
+from config import (
+    payload_client_account,
+    ADD_SENSORS_URL,
+    GET_SENSORS_URL,
+    GET_USER_SENSORS_URL,
+    GET_DEVICE_SENSORS_URL,
+    DELETE_SENSORS_URL
+)
 
 
-# @pytest.fixture(autouse=True)
-# def run_before_tests():
-#     rq_per_s.clear()
-#     time_per_rq.clear()
-#     time_per_rq_c.clear()
-#     transfer_rate.clear()
-#     connect_time.clear()
-#     processing_time.clear()
-#     waiting_time.clear()
-#     failed_rq.clear()
-#     reqs.clear()
+@pytest.fixture(autouse=True)
+def run_before_tests():
+    pass
 
 
-# def test_get_sensors():
-#     json_path = str('test/helper_jsons/admin_credentials.json')
-#     template_post(GET_SENSORS_URL,
-#                   'get_sensors',
-#                   json_path=json_path)
+def test_post_sensor():
+    with open('test/helper_jsons/new_sensor.json') as json_file:
+        payload_json = json.load(json_file)
+        payload_json["id_user"] = HTTPClient.global_id
+        payload_json["id_device"] = HTTPClient.global_device_id
+        payload = str(payload_json).replace("\'", "\"")
 
-#     assert True
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': HTTPClient.global_access_token
+        }
+        ret = HTTPClient.template_post(url=ADD_SENSORS_URL,
+                                       payload=payload,
+                                       headers=headers)
 
+        assert "id" in ret.json().keys()
+        HTTPClient.sensor_id = int(ret.json()["id"])
 
-# def test_add_sensor():
-#     json_path = str('test/helper_jsons/new_sensor.json')
-#     template_post(ADD_SENSORS_URL,
-#                   'add_sensor',
-#                   json_path=json_path)
-
-#     assert True
-
-
-# def test_get_user_sensors():
-#     template_get(GET_USER_SENSORS_URL.replace("{ID}", "2"),
-#                  'get_user_sensors',
-#                  SharedValues.access_token)
-    
-#     assert True
+        assert True
 
 
-# def test_get_device_sensors():
-#     template_get(GET_DEVICE_SENSORS_URL.replace("{ID}", "2"),
-#                  'get_device_sensors',
-#                  SharedValues.access_token)
+def test_post_sensor_invalid_uid():
+    with open('test/helper_jsons/new_sensor.json') as json_file:
+        payload_json = json.load(json_file)
+        payload_json["id_user"] = -1
+        payload_json["id_device"] = HTTPClient.global_device_id
+        payload = str(payload_json).replace("\'", "\"")
 
-#     assert True
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': HTTPClient.global_access_token
+        }
+        ret = HTTPClient.template_post_bad_request(url=ADD_SENSORS_URL,
+                                                   payload=payload,
+                                                   headers=headers)
+
+        assert "Invalid user id" in ret.text
+
+
+def test_post_sensor_invalid_devid():
+    with open('test/helper_jsons/new_sensor.json') as json_file:
+        payload_json = json.load(json_file)
+        payload_json["id_user"] = HTTPClient.global_id
+        payload_json["id_device"] = -1
+        payload = str(payload_json).replace("\'", "\"")
+
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': HTTPClient.global_access_token
+        }
+        ret = HTTPClient.template_post_bad_request(url=ADD_SENSORS_URL,
+                                                   payload=payload,
+                                                   headers=headers)
+
+        assert "Invalid device id" in ret.text
+
+
+def test_get_sensors():
+    with open('test/helper_jsons/admin_credentials.json') as json_file:
+        payload_json = json.load(json_file)
+        payload = str(payload_json).replace("\'", "\"")
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': HTTPClient.global_access_token
+        }
+
+        ret = HTTPClient.template_post(url=GET_SENSORS_URL,
+                                       payload=payload,
+                                       headers=headers,
+                                       need_access_token=True)
+        assert isinstance(ret.json(), list)
+        assert True
+
+
+def test_get_user_sensors():
+    url = GET_USER_SENSORS_URL.format(ID=HTTPClient.global_id)
+    headers = {
+        'Authorization': HTTPClient.global_access_token
+    }
+
+    ret = HTTPClient.template_get(url=url,
+                                  payload={},
+                                  headers=headers,
+                                  need_access_token=True)
+    assert isinstance(ret.json(), list)
+    assert True
+
+
+def test_get_device_sensors():
+    url = GET_DEVICE_SENSORS_URL.format(ID=HTTPClient.global_id)
+    headers = {
+        'Authorization': HTTPClient.global_access_token
+    }
+
+    ret = HTTPClient.template_get(url=url,
+                                  payload={},
+                                  headers=headers,
+                                  need_access_token=True)
+    assert isinstance(ret.json(), list)
+    assert True
+
+
+def test_delete_sensor():
+    url = DELETE_SENSORS_URL.format(ID=HTTPClient.sensor_id)
+
+    headers = {
+        'Authorization': HTTPClient.global_access_token
+    }
+
+    response = requests.request("DELETE", url, headers=headers, data={})
+    assert response.status_code == HTTPStatus.OK
