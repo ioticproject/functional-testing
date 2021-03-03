@@ -130,8 +130,9 @@ def pytest_sessionfinish(session):
     headers = {
         'Authorization': HTTPClient.global_access_token
     }
-    if requests.request("DELETE",
-                        url=DELETE_USER_URL.format(ID=HTTPClient.global_id),
-                        headers=headers,
-                        data={}).status_code != HTTPStatus.OK:
-        exit("[Error] Could not delete the test user. The database may be polluted")
+    response = requests.request("DELETE",
+                                url=DELETE_USER_URL.format(ID=HTTPClient.global_id),
+                                headers=headers,
+                                data={})
+    if response.status_code != HTTPStatus.OK:
+        exit("[Error] Could not delete the test user. The database may be polluted" + response.text)

@@ -63,17 +63,18 @@ class HTTPClient:
         assert (
             response.status_code == HTTPStatus.OK
             or response.status_code == HTTPStatus.CREATED
-        )
+        )        
         ret = response
 
         if need_access_token:
             del headers["Authorization"]
             response = requests.request("POST", url, headers=headers, data=payload)
-
+            
             assert response.status_code == HTTPStatus.UNAUTHORIZED
 
             headers["Authorization"] = Utils.get_random_token()
             response = requests.request("POST", url, headers=headers, data=payload)
+            
             assert response.status_code == HTTPStatus.UNAUTHORIZED
 
         return ret

@@ -9,7 +9,8 @@ from config import (
     ADD_DEVICE_URL,
     GET_DEVICES_URL,
     GET_USER_DEVICES_URL,
-    DELETE_DEVICE_URL
+    DELETE_DEVICE_URL, 
+    LOGGER
 )
 
 
@@ -23,7 +24,7 @@ def test_post_device():
         payload_json = json.load(json_file)
         payload_json["id_user"] = HTTPClient.global_id
         payload = str(payload_json).replace("\'", "\"")
-
+        
         headers = {
             'Content-Type': 'application/json',
             'Authorization': HTTPClient.global_access_token
@@ -33,7 +34,7 @@ def test_post_device():
                                        headers=headers)
 
         assert "id" in ret.json().keys()
-        HTTPClient.device_id = int(ret.json()["id"])
+        HTTPClient.device_id = ret.json()["id"]
 
         assert True
 

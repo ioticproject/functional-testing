@@ -35,7 +35,7 @@ def test_post_sensor():
                                        headers=headers)
 
         assert "id" in ret.json().keys()
-        HTTPClient.sensor_id = int(ret.json()["id"])
+        HTTPClient.sensor_id = ret.json()["id"]
 
         assert True
 

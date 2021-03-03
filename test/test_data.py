@@ -34,7 +34,7 @@ def test_post_data():
                                        headers=headers)
 
         assert "id" in ret.json().keys()
-        HTTPClient.data_id = int(ret.json()["id"])
+        HTTPClient.data_id = ret.json()["id"]
 
         assert True
 
