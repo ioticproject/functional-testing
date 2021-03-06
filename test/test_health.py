@@ -6,7 +6,8 @@ import json
 from utils import Utils, HTTPClient
 from config import (
     payload_client_account,
-    HEALTH_URL
+    HEALTH_URL,
+    LOGGER
 )
 
 
@@ -26,3 +27,4 @@ def test_health():
 
     assert response.status_code == HTTPStatus.OK
     assert response.json()["message"] == "Healthy"
+    LOGGER.info("The server is healthy.")

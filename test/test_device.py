@@ -3,15 +3,13 @@ import requests
 from http import HTTPStatus
 import json
 
-from utils import Utils, HTTPClient
+from utils import HTTPClient, Utils
 from config import (
-    payload_client_account,
     ADD_DEVICE_URL,
     GET_DEVICES_URL,
     GET_DEVICE_URL,
     GET_USER_DEVICES_URL,
-    DELETE_DEVICE_URL,
-    LOGGER
+    DELETE_DEVICE_URL
 )
 
 
@@ -62,10 +60,10 @@ def test_post_device_exists():
 
 def test_post_device_inexistent_user_id():
     with open('test/helper_jsons/new_device.json') as json_file:
-        url = ADD_DEVICE_URL.format(USER_ID="------------")
+        url = ADD_DEVICE_URL.format(USER_ID="INVALID")
 
         payload_json = json.load(json_file)
-        payload_json["id_user"] = "------------"
+        payload_json["id_user"] = "INVALID"
         payload = str(payload_json).replace("\'", "\"")
 
         headers = {
@@ -103,19 +101,21 @@ def test_get_devices():
     }
 
     ret = HTTPClient.template_get(url=GET_DEVICES_URL,
-                                    payload={},
-                                    headers=headers,
-                                    need_access_token=True)
+                                  payload={},
+                                  headers=headers,
+                                  need_access_token=True)
     assert isinstance(ret.json(), list)
 
 
 def test_get_device():
+    url = GET_DEVICE_URL.format(USER_ID=HTTPClient.global_id,
+                                ID=HTTPClient.device_id)
+
     headers = {
         'Content-Type': 'application/json',
         'Authorization': HTTPClient.global_access_token
     }
 
-    url = GET_DEVICE_URL.format(USER_ID=HTTPClient.global_id, ID=HTTPClient.device_id)
     ret = HTTPClient.template_get(url=url,
                                   payload={},
                                   headers=headers,
@@ -126,6 +126,7 @@ def test_get_device():
 
 def test_get_user_devices():
     url = GET_USER_DEVICES_URL.format(USER_ID=HTTPClient.global_id)
+
     headers = {
         'Authorization': HTTPClient.global_access_token
     }
@@ -135,6 +136,20 @@ def test_get_user_devices():
                                   headers=headers,
                                   need_access_token=True)
     assert isinstance(ret.json(), list)
+
+
+def test_delete_sensor_unauthorized():
+    url = DELETE_DEVICE_URL.format(USER_ID=HTTPClient.global_id,
+                                   ID=HTTPClient.device_id)
+
+    headers = {
+        'Authorization': Utils.get_random_token()
+    }
+
+    assert requests.request("DELETE",
+                            url,
+                            headers=headers,
+                            data={}).status_code == HTTPStatus.UNAUTHORIZED
 
 
 def test_delete_device():

@@ -97,7 +97,7 @@ def generate_payload_files():
     with open("test/helper_jsons/new_sensor.json", 'w') as f:
         random_str = "TEST-" + Utils.get_random_string(16)
         new_user_payload = str({"type": "temperature",
-                                "measuremUnit": "celssius",
+                                "measure_unit": "celssius",
                                 "id_user": 4,
                                 "id_device": 4}).replace("\'", "\"")
         f.write(new_user_payload)

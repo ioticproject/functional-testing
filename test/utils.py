@@ -52,6 +52,8 @@ class HTTPClient:
 
     def template_get(url, headers, payload, need_access_token=False):
         response = requests.request("GET", url, headers=headers, data=payload)
+        # print("**********************************************************")
+        # print(response.text)
         assert (
             response.status_code == HTTPStatus.OK
             or response.status_code == HTTPStatus.CREATED
@@ -85,6 +87,8 @@ class HTTPClient:
 
     def template_post(url, headers, payload, need_access_token=False):
         response = requests.request("POST", url, headers=headers, data=payload)
+        # print("**********************************************************")
+        # print(response.text)
         assert (
             response.status_code == HTTPStatus.OK
             or response.status_code == HTTPStatus.CREATED
@@ -137,7 +141,7 @@ class Utils:
         This should be used as a dummy authentication token
         """
         TOKEN_LENGTH = 256
-        return Utils.get_random_string(TOKEN_LENGTH)
+        return "jwt" + Utils.get_random_string(TOKEN_LENGTH)
 
 
     def replace_key_in_json(json, key, val):
