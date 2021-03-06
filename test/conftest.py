@@ -1,6 +1,7 @@
 from utils import Utils, HTTPClient
 from config import payload_client_account, payload_admin_account, LOGGER
-import os, shutil
+import os
+import shutil
 import requests
 from http import HTTPStatus
 
@@ -13,9 +14,6 @@ from config import (
 
 
 def add_objects_for_tests():
-    # Generate access token
-    HTTPClient.generate_access_token()
-
     # Add global user for the device and sensor tests
     random_str = Utils.get_random_string(16)
     new_user_payload = str({"username": "TEST-" + random_str,
@@ -36,6 +34,10 @@ def add_objects_for_tests():
     HTTPClient.global_id = response.json()["id"]
     LOGGER.info("[INFO] Added user for testing.")
 
+    # Generate access token
+    HTTPClient.generate_access_token(username=HTTPClient.global_username,
+                                     password=HTTPClient.global_password)
+
     # Add global device for the data and sensors tests
     new_device_payload = str({"name": "TEST-" + random_str,
                               "id_user": HTTPClient.global_id,
@@ -43,27 +45,28 @@ def add_objects_for_tests():
                               }).replace("\'", "\"")
     headers["Authorization"] = HTTPClient.global_access_token
     response = requests.request("POST",
-                                url=ADD_DEVICE_URL,
+                                url=ADD_DEVICE_URL.format(USER_ID=HTTPClient.global_id),
                                 headers=headers,
                                 data=new_device_payload)
     if response.status_code != HTTPStatus.CREATED:
-        exit("[ERROR] Could not add device for testing.")
+        exit("[ERROR] Could not add device for testing." + response.text)
     HTTPClient.global_device_id = response.json()["id"]
     LOGGER.info("[INFO] Added device for testing.")
 
     # Add global sensor for the data tests
     new_sensor_payload = str({"type": "TEST-" + random_str,
-                              "measuremUnit": "Celssius",
+                              "measure_unit": "Celssius",
                               "id_user": HTTPClient.global_id,
                               "id_device": HTTPClient.global_device_id
                               }).replace("\'", "\"")
     headers["Authorization"] = HTTPClient.global_access_token
     response = requests.request("POST",
-                                url=ADD_SENSORS_URL,
+                                url=ADD_SENSORS_URL.format(USER_ID=HTTPClient.global_id,
+                                                           DEVICE_ID=HTTPClient.global_device_id),
                                 headers=headers,
                                 data=new_sensor_payload)
     if response.status_code != HTTPStatus.CREATED:
-        exit("[ERROR] Could not add sensor for testing.")
+        exit("[ERROR] Could not add sensor for testing. " + response.text)
     HTTPClient.global_sensor_id = response.json()["id"]
     LOGGER.info("[INFO] Added sensor for testing.")
 

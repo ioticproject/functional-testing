@@ -1,34 +1,53 @@
 import random
 import string
-import subprocess
 from http import HTTPStatus
 
 import requests
 from config import (AUTH_URL, LOGGER, payload_admin_account)
 
 
-
 class HTTPClient:
     access_token = None
     global_access_token = None
 
-    def generate_access_token():
+    def generate_access_token(username=None, password=None):
         url = AUTH_URL
         headers = {'Content-Type': 'application/json'}
 
-        response = requests.request(
-            method='POST',
-            url=url,
-            headers=headers,
-            data=payload_admin_account
-        )
+        if username and password:
+            payload_json = {
+                "username": username,
+                "password": password
+            }
+            payload = str(payload_json).replace("\'", "\"")
 
+            response = requests.request(
+                method='POST',
+                url=url,
+                headers=headers,
+                data=payload
+            )
+
+            if response.status_code != HTTPStatus.OK:
+                LOGGER.critical('POST status code = ' + str(response.status_code))
+                return
+
+            HTTPClient.global_access_token = "jwt " + response.json()['access_token']
+            LOGGER.info('Got the user access token: ' + HTTPClient.global_access_token)
+
+        payload = payload_admin_account
+        response = requests.request(
+                method='POST',
+                url=url,
+                headers=headers,
+                data=payload
+            )
         if response.status_code != HTTPStatus.OK:
             LOGGER.critical('POST status code = ' + str(response.status_code))
             return
 
-        HTTPClient.global_access_token = "jwt " + response.json()['access_token']
-        LOGGER.info('Got the intra access token: ' + HTTPClient.global_access_token)
+        HTTPClient.admin_access_token = "jwt " + response.json()['access_token']
+        LOGGER.info('Got the ADMIN access token: ' + HTTPClient.admin_access_token)
 
 
     def template_get(url, headers, payload, need_access_token=False):
@@ -41,11 +60,17 @@ class HTTPClient:
 
         if need_access_token:
             del headers["Authorization"]
-            response = requests.request("GET", url, headers=headers, data=payload)
+            response = requests.request("GET",
+                                        url=url,
+                                        headers=headers,
+                                        data=payload)
             assert response.status_code == HTTPStatus.UNAUTHORIZED
 
             headers["Authorization"] = Utils.get_random_token()
-            response = requests.request("GET", url, headers=headers, data=payload)
+            response = requests.request("GET",
+                                        url=url,
+                                        headers=headers,
+                                        data=payload)
             assert response.status_code == HTTPStatus.UNAUTHORIZED
 
         return ret
@@ -63,18 +88,24 @@ class HTTPClient:
         assert (
             response.status_code == HTTPStatus.OK
             or response.status_code == HTTPStatus.CREATED
-        )        
+        )
         ret = response
 
         if need_access_token:
             del headers["Authorization"]
-            response = requests.request("POST", url, headers=headers, data=payload)
-            
+            response = requests.request("POST",
+                                        url=url,
+                                        headers=headers,
+                                        data=payload)
+
             assert response.status_code == HTTPStatus.UNAUTHORIZED
 
             headers["Authorization"] = Utils.get_random_token()
-            response = requests.request("POST", url, headers=headers, data=payload)
-            
+            response = requests.request("POST",
+                                        url=url,
+                                        headers=headers,
+                                        data=payload)
+
             assert response.status_code == HTTPStatus.UNAUTHORIZED
 
         return ret
