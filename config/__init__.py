@@ -101,3 +101,4 @@ payload_client_account = str({'username': CLIENT_USERNAME, 'password': CLIENT_PA
 # LoggingConfig.disable_default_loggers()
 # LoggingConfig.configure_app_logger()
 LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)

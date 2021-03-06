@@ -32,7 +32,7 @@ def add_objects_for_tests():
     HTTPClient.global_username = response.json()["username"]
     HTTPClient.global_password = response.json()["password"]
     HTTPClient.global_id = response.json()["id"]
-    LOGGER.info("[INFO] Added user for testing.")
+    LOGGER.info("Added user for testing.")
 
     # Generate access token
     HTTPClient.generate_access_token(username=HTTPClient.global_username,
@@ -51,7 +51,7 @@ def add_objects_for_tests():
     if response.status_code != HTTPStatus.CREATED:
         exit("[ERROR] Could not add device for testing." + response.text)
     HTTPClient.global_device_id = response.json()["id"]
-    LOGGER.info("[INFO] Added device for testing.")
+    LOGGER.info("Added device for testing.")
 
     # Add global sensor for the data tests
     new_sensor_payload = str({"type": "TEST-" + random_str,
@@ -68,7 +68,7 @@ def add_objects_for_tests():
     if response.status_code != HTTPStatus.CREATED:
         exit("[ERROR] Could not add sensor for testing. " + response.text)
     HTTPClient.global_sensor_id = response.json()["id"]
-    LOGGER.info("[INFO] Added sensor for testing.")
+    LOGGER.info("Added sensor for testing.")
 
 
 def generate_payload_files():

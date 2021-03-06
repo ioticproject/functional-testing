@@ -9,6 +9,7 @@ python = "^3.8"
 requests = "^2.23.0"
 pytest = "^5.4.3"
 ansicolors = "^1.1.8"
+pytest-html-reporter = "^0.2.3"
 
 [tool.poetry.dev-dependencies]
 black = {version = "^19.10b0", allow-prereleases = true}
