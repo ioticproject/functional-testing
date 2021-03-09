@@ -104,6 +104,7 @@ def test_get_devices():
                                   payload={},
                                   headers=headers,
                                   need_access_token=True)
+
     assert 'devices' in ret.json().keys()
     assert isinstance(ret.json().get('devices'), list)
 
