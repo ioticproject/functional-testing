@@ -36,8 +36,8 @@ def test_post_data():
                                        payload=payload,
                                        headers=headers)
 
-        assert "id" in ret.json().keys()
-        HTTPClient.data_id = ret.json()["id"]
+        assert "_id" in ret.json().keys()
+        HTTPClient.data_id = ret.json()["_id"]
 
         assert True
 
@@ -98,7 +98,8 @@ def test_get_data():
                                   payload={},
                                   headers=headers,
                                   need_access_token=True)
-    assert isinstance(ret.json(), list)
+    assert 'data' in ret.json().keys()
+    assert isinstance(ret.json().get('data'), list)
 
 
 def test_get_sensor_data():
@@ -113,7 +114,8 @@ def test_get_sensor_data():
                                   payload={},
                                   headers=headers,
                                   need_access_token=True)
-    assert isinstance(ret.json(), list)
+    assert 'data' in ret.json().keys()
+    assert isinstance(ret.json().get('data'), list)
 
 
 def test_get_filtered_sensor_data():
@@ -130,7 +132,8 @@ def test_get_filtered_sensor_data():
                                   payload={},
                                   headers=headers,
                                   need_access_token=True)
-    assert isinstance(ret.json(), list)
+    assert 'data' in ret.json().keys()
+    assert isinstance(ret.json().get('data'), list)
 
     # ret = HTTPClient.template_get(url=url + query_str2,
     #                               payload={},

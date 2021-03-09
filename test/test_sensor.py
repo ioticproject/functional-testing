@@ -37,8 +37,8 @@ def test_post_sensor():
                                        payload=payload,
                                        headers=headers)
 
-        assert "id" in ret.json().keys()
-        HTTPClient.sensor_id = ret.json()["id"]
+        assert "_id" in ret.json().keys()
+        HTTPClient.sensor_id = ret.json()["_id"]
 
         assert True
 
@@ -113,7 +113,9 @@ def test_get_sensors():
                                   payload={},
                                   headers=headers,
                                   need_access_token=True)
-    assert isinstance(ret.json(), list)
+
+    assert 'sensors' in ret.json().keys()
+    assert isinstance(ret.json().get('sensors'), list)
 
 
 def test_get_sensor():
@@ -129,7 +131,7 @@ def test_get_sensor():
                                   payload={},
                                   headers=headers,
                                   need_access_token=True)
-    assert {"measure_unit", "type", "data", "id_user", "id", "id_device"}.issubset(ret.json().keys())
+    assert {"measure_unit", "type", "data", "id_user", "_id", "id_device"}.issubset(ret.json().keys())
 
 
 
@@ -144,7 +146,8 @@ def test_get_user_sensors():
                                   payload={},
                                   headers=headers,
                                   need_access_token=True)
-    assert isinstance(ret.json(), list)
+    assert 'sensors' in ret.json().keys()
+    assert isinstance(ret.json().get('sensors'), list)
     assert True
 
 
@@ -159,7 +162,8 @@ def test_get_device_sensors():
                                   payload={},
                                   headers=headers,
                                   need_access_token=True)
-    assert isinstance(ret.json(), list)
+    assert 'sensors' in ret.json().keys()
+    assert isinstance(ret.json().get('sensors'), list)
     assert True
 
 

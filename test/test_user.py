@@ -46,10 +46,10 @@ def test_post_user():
                                        payload=payload,
                                        headers=headers)
 
-        assert {"password", "id", "username"}.issubset(ret.json().keys())
+        assert {"password", "_id", "username"}.issubset(ret.json().keys())
         HTTPClient.username = ret.json()["username"]
         HTTPClient.password = ret.json()["password"]
-        HTTPClient.id = ret.json()["id"]
+        HTTPClient.id = ret.json()["_id"]
 
 
 def test_post_user_exists():
@@ -113,7 +113,7 @@ def test_get_user():
                                   headers=headers,
                                   need_access_token=True)
 
-    assert {"devices", "email", "id", "name"}.issubset(ret.json().keys())
+    assert {"devices", "email", "_id", "name"}.issubset(ret.json().keys())
 
 
 def test_get_users():
@@ -126,7 +126,8 @@ def test_get_users():
                                   payload={},
                                   headers=headers,
                                   need_access_token=True)
-    assert isinstance(ret.json(), list)
+    assert 'users' in ret.json().keys()
+    assert isinstance(ret.json().get('users'), list)
 
 
 def test_put_user():

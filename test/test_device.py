@@ -35,8 +35,8 @@ def test_post_device():
                                        payload=payload,
                                        headers=headers)
 
-        assert "id" in ret.json().keys()
-        HTTPClient.device_id = ret.json()["id"]
+        assert "_id" in ret.json().keys()
+        HTTPClient.device_id = ret.json()["_id"]
 
 
 def test_post_device_exists():
@@ -104,7 +104,8 @@ def test_get_devices():
                                   payload={},
                                   headers=headers,
                                   need_access_token=True)
-    assert isinstance(ret.json(), list)
+    assert 'devices' in ret.json().keys()
+    assert isinstance(ret.json().get('devices'), list)
 
 
 def test_get_device():
@@ -121,7 +122,7 @@ def test_get_device():
                                   headers=headers,
                                   need_access_token=True)
 
-    assert {"description", "id_user", "id", "name"}.issubset(ret.json().keys())
+    assert {"description", "id_user", "_id", "name"}.issubset(ret.json().keys())
 
 
 def test_get_user_devices():
@@ -135,7 +136,9 @@ def test_get_user_devices():
                                   payload={},
                                   headers=headers,
                                   need_access_token=True)
-    assert isinstance(ret.json(), list)
+
+    assert 'devices' in ret.json().keys()
+    assert isinstance(ret.json().get('devices'), list)
 
 
 def test_delete_sensor_unauthorized():
