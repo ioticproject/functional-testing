@@ -6,6 +6,7 @@ import requests
 from http import HTTPStatus
 import time
 import random
+import datetime
 
 from config import (
     ADD_USER_URL,
@@ -83,12 +84,17 @@ if __name__ == '__main__':
     headers = {"Authorization": HTTPClient.test_access_token,
                'Content-Type': 'application/json'}
 
+    d = datetime.datetime.strptime('2021-03-10 05:03:30', '%Y-%m-%d %H:%M:%S')
+    delay = datetime.timedelta(seconds=60)
+
     while TIMEOUT > 0:
-        new_data_payload = str({"value": random.randint(1,1000)}).replace("\'", "\"")
+        d += delay
+        new_data_payload = str({
+            "value": random.randint(1,1000),
+            "timestamp": str(d)}).replace("\'", "\"")
         response = requests.request("POST",
                                     url=url,
                                     headers=headers,
                                     data=new_data_payload)
         print("Added new data for sensor " + str(HTTPClient.test_sensor_id))
-        time.sleep(60)
         TIMEOUT -= 1
