@@ -131,7 +131,7 @@ def test_get_sensor():
                                   payload={},
                                   headers=headers,
                                   need_access_token=True)
-    assert {"measure_unit", "type", "data", "id_user", "_id", "id_device"}.issubset(ret.json().keys())
+    assert {"measure_unit", "type", "id_user", "_id", "id_device"}.issubset(ret.json().keys())
 
 
 

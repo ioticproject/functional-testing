@@ -10,7 +10,8 @@ from config import (
     GET_USERS_URL,
     DELETE_USER_URL,
     UPDATE_USER_URL,
-    GET_USER_URL
+    GET_USER_URL,
+    CONFIRM_ACCOUNT_URL
 )
 
 
@@ -93,6 +94,14 @@ def test_login():
     headers = {
         'Content-Type': 'application/json'
     }
+
+    HTTPClient.template_post_unauthorized(url=USER_LOGIN_URL,
+                                   payload=payload,
+                                   headers=headers)
+
+    HTTPClient.template_get(url=CONFIRM_ACCOUNT_URL.format(USERNAME=HTTPClient.username),
+                            payload={},
+                            headers=headers)
 
     ret = HTTPClient.template_post(url=USER_LOGIN_URL,
                                    payload=payload,

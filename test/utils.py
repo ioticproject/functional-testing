@@ -122,6 +122,13 @@ class HTTPClient:
         return response
 
 
+    def template_post_unauthorized(url, headers, payload):
+        response = requests.request("POST", url, headers=headers, data=payload)
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+        return response
+
+
 class Utils:
 
     @staticmethod

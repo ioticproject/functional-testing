@@ -77,7 +77,7 @@ def add_objects_for_tests():
 if __name__ == '__main__':
     add_objects_for_tests()
 
-    TIMEOUT = 2000
+    TIMEOUT = 200
     url = ADD_DATA_URL.format(USER_ID=HTTPClient.test_id,
                               DEVICE_ID=HTTPClient.test_device_id,
                               SENSOR_ID=HTTPClient.test_sensor_id)
